@@ -1,12 +1,11 @@
 import * as THREE from 'three';
-import {useEffect} from 'react';
+import {useState, useEffect} from 'react';
 
 const Main: React.FC = () => {
+  const [width, setWidth] = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
 
-    const createBox = () => {
-        // サイズを指定
-        const width = 600;
-        const height = 540;
+    const createBox = (width: number, height: number) => {
         // レンダラを作成
         const renderer: any = new THREE.WebGLRenderer({
           canvas: document.querySelector("#canvas") as HTMLCanvasElement
@@ -33,7 +32,16 @@ const Main: React.FC = () => {
       };
 
       useEffect(() => {
-        createBox();
+        createBox(width, height);
+      }, [width, height])
+
+      useEffect(() => {
+        const onResize = () => {
+          setWidth(window.innerWidth);
+          setHeight(window.innerHeight);
+        }
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
       }, []);
 
     return (
