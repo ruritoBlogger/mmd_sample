@@ -1,6 +1,8 @@
 import { WebGLRenderer, Scene, AmbientLight, PerspectiveCamera } from "three";
+import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader";
 
 import useGetWindowSize from "./useGetWindowSize";
+// import Model from "../models/こんにゃく式戌亥とこver1.0/戌亥とこ.pmx";
 
 const Main: React.FC = () => {
   const { width, height } = useGetWindowSize();
@@ -15,47 +17,60 @@ const Main: React.FC = () => {
     const renderer = new WebGLRenderer({ canvas: canvas, antialias: true });
 
     // 光の作成
-    var ambient = new AmbientLight(0xeeeeee);
+    const ambient = new AmbientLight(0xeeeeee);
     scene.add(ambient);
 
     // 画面表示の設定
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0xcccccc, 0);
-    document.body.appendChild(renderer.domElement);
+    renderer.setSize(width, height);
 
     // カメラの作成
-    camera.position.set(0, 10, 60);
+    const camera = new PerspectiveCamera(
+      75,
+      canvas.clientWidth / canvas.clientHeight,
+      0.1,
+      1000
+    );
+    camera.position.set(0, 0, 20);
 
     // モデルとモーションの読み込み準備
-    var modelFile = "./mmd/miku/Lat式ミクVer2.31_Normal.pmd";
-    var onProgress = function (xhr) {};
-    var onError = function (xhr) {
-      console.log("load mmd error");
+    const modelFile = "./models/こんにゃく式戌亥とこver1.0/戌亥とこ.pmx";
+    const onProgress = ({ loaded, total }) => {
+      console.log(loaded, total);
     };
+    const onError = (error: ErrorEvent) => {
+      console.log(error);
+    };
+
     //MMDLoaderをインスタンス化
-    var loader = new MMDLoader();
-    //loadModelメソッドにモデルのPATH
+    const loader = new MMDLoader();
+
     //コールバックに画面に描画するための諸々のプログラムを書く
-    loader.loadModel(
+    loader.load(
       modelFile,
       function (object) {
-        mesh = object;
+        let mesh = object;
         mesh.position.set(0, -10, 0);
         mesh.rotation.set(0, 0, 0);
         scene.add(mesh);
       },
       onProgress,
-      onError
+      (error) => onError(error)
     );
 
-    // リサイズ時
-    window.addEventListener("resize", onWindowResize, false);
+    const render = () => {
+      requestAnimationFrame(render);
+      renderer.clear();
+      renderer.render(scene, camera);
+    };
+
+    render();
   };
 
   return (
     <>
-      <canvas id="canvas" />
+      <canvas ref={createCharactor} />
     </>
   );
 };
