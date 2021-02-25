@@ -1,19 +1,19 @@
-import * as path from 'path'
-import * as webpack from 'webpack'
-import HtmlWebpackPlugin from 'html-webpack-plugin';
+import * as path from "path";
+import * as webpack from "webpack";
+import HtmlWebpackPlugin from "html-webpack-plugin";
 
-import { devBabelConfig } from './babel.config';
+import { devBabelConfig } from "./babel.config";
 
-const src = path.resolve(__dirname, 'src');
-const pub = path.resolve(__dirname, 'public');
+const src = path.resolve(__dirname, "src");
+const pub = path.resolve(__dirname, "public");
 
 const config: webpack.Configuration = {
-  mode: 'development',
+  mode: "development",
   entry: `${src}/index.tsx`,
 
   output: {
     path: pub,
-    filename: 'bundle.js',
+    filename: "bundle.js",
   },
 
   module: {
@@ -21,38 +21,53 @@ const config: webpack.Configuration = {
       {
         test: /\.(js|ts)x?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
+        loader: "babel-loader",
         options: devBabelConfig,
       },
       {
         test: /\.scss/,
         use: [
-          'style-loader',
+          "style-loader",
           {
-            loader: 'css-loader',
+            loader: "css-loader",
             options: { url: false },
           },
-          'sass-loader',
+          "sass-loader",
         ],
+      },
+      {
+        test: /\.pmx/,
+        loader: "file-loader",
+        options: {},
+      },
+      {
+        test: /\.png/,
+        loader: "file-loader",
+        options: {},
+      },
+      {
+        test: /\.bmp/,
+        loader: "file-loader",
+        options: {},
       },
     ],
   },
 
   devServer: {
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     port: 3000,
     contentBase: pub,
     historyApiFallback: true,
   },
 
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    extensions: [".js", ".jsx", ".ts", ".tsx"],
   },
 
   plugins: [
     new HtmlWebpackPlugin({
       template: `${pub}/index.base.html`,
-      filename: 'index.html',
+      filename: "index.html",
     }),
   ],
 };
