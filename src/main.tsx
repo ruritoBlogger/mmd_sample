@@ -129,7 +129,7 @@ const Main: React.FC = () => {
       0.1,
       1000
     );
-    camera.position.set(0, 0, 20);
+    camera.position.set(0, 18, 15);
 
     // モデルやアニメーションを読み込む
     const mmd_path = "./models/こんにゃく式戌亥とこver1.0/戌亥とこ.pmx";
