@@ -1,9 +1,16 @@
-import { WebGLRenderer, Scene, AmbientLight, PerspectiveCamera, SkinnedMesh, LoopOnce, AnimationClip, Clock } from "three";
+import {
+  WebGLRenderer,
+  Scene,
+  AmbientLight,
+  PerspectiveCamera,
+  SkinnedMesh,
+  AnimationClip,
+  Clock,
+} from "three";
 import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader";
 import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper";
 
 import useGetWindowSize from "./useGetWindowSize";
-// import Model from "../models/こんにゃく式戌亥とこver1.0/戌亥とこ.pmx";
 
 const Main: React.FC = () => {
   const { width, height } = useGetWindowSize();
@@ -11,17 +18,16 @@ const Main: React.FC = () => {
   let isAnimationStarted: boolean = false;
   let helper: MMDAnimationHelper = new MMDAnimationHelper();
 
-
   /**
    * モデルやアニメーションの読み込みを表示する
    * @param xhr どれだけ読み込んでいるかという情報
    */
   const onProgress = (xhr: ProgressEvent<EventTarget>) => {
     if (xhr.lengthComputable) {
-      const percentComplete = xhr.loaded / xhr.total * 100;
-      console.log(Math.round(percentComplete, 2) + '% downloaded');
+      const percentComplete = (xhr.loaded / xhr.total) * 100;
+      console.log(Math.round(percentComplete, 2) + "% downloaded");
     }
-  }
+  };
 
   /**
    * モデルやアニメーションの読み込みに失敗した際に実行される
@@ -29,7 +35,7 @@ const Main: React.FC = () => {
    */
   const onError = (xhr: ErrorEvent) => {
     console.log("Load ERROR");
-  }
+  };
 
   /**
    * モデルやアニメーションの読み込みを行う
@@ -37,8 +43,12 @@ const Main: React.FC = () => {
    * @param mmd_path どのモデルを読み込むか
    * @param vmd_path どのアニメーションを読み込むか
    */
-  const LoadModel = async (scene: Scene, mmd_path: string, vmd_path: string) => {
-    const loader = new MMDLoader()
+  const LoadModel = async (
+    scene: Scene,
+    mmd_path: string,
+    vmd_path: string
+  ) => {
+    const loader = new MMDLoader();
 
     /**
      * モデルを非同期処理を用いて読み込む
@@ -46,15 +56,23 @@ const Main: React.FC = () => {
      * @param model_path どのモデルを読み込むか
      * @returns 読み込んだモデル
      */
-    const LoadPMX = (scene: Scene, model_path: string): Promise<SkinnedMesh> => {
+    const LoadPMX = (
+      scene: Scene,
+      model_path: string
+    ): Promise<SkinnedMesh> => {
       // FIXME: rejectされる場合を追記したい
-      return new Promise(resolve => {
-        loader.load(model_path, (mesh: SkinnedMesh) => {
-          scene.add(mesh);
-          resolve(mesh);
-        }, onProgress, onError);
+      return new Promise((resolve) => {
+        loader.load(
+          model_path,
+          (mesh: SkinnedMesh) => {
+            scene.add(mesh);
+            resolve(mesh);
+          },
+          onProgress,
+          onError
+        );
       });
-    }
+    };
 
     /**
      * アニメーションを非同期処理を用いて読み込む
@@ -62,17 +80,26 @@ const Main: React.FC = () => {
      * @param vmd_path どのアニメーションを読み込むか
      * @returns 読み込んだアニメーション
      */
-    const LoadVMD = (mesh: SkinnedMesh, vmd_path: string): Promise<AnimationClip> => {
+    const LoadVMD = (
+      mesh: SkinnedMesh,
+      vmd_path: string
+    ): Promise<AnimationClip> => {
       // FIXME: rejectされる場合を追記したい
-      return new Promise(resolve => {
-        loader.loadAnimation(vmd_path, mesh, (vmd: AnimationClip | SkinnedMesh) => {
-          vmd.name = "animation";
-          if (vmd instanceof AnimationClip) {
-            resolve(vmd);
-          }
-        }, onProgress, onError);
+      return new Promise((resolve) => {
+        loader.loadAnimation(
+          vmd_path,
+          mesh,
+          (vmd: AnimationClip | SkinnedMesh) => {
+            vmd.name = "animation";
+            if (vmd instanceof AnimationClip) {
+              resolve(vmd);
+            }
+          },
+          onProgress,
+          onError
+        );
       });
-    }
+    };
 
     /**
      * アニメーションを用いてMMDモデルを制御する
@@ -80,13 +107,15 @@ const Main: React.FC = () => {
      * @param animation 読み込ませたいアニメーション
      */
     const VMDControl = (mesh: SkinnedMesh, animation: AnimationClip) => {
-
       isAnimationStarted = true;
-      helper = new MMDAnimationHelper({ afterglow: 2.0, resetPhysicsOnLoop: true});
+      helper = new MMDAnimationHelper({
+        afterglow: 2.0,
+        resetPhysicsOnLoop: true,
+      });
 
       helper.add(mesh, {
         animation: animation,
-        physics: false
+        physics: true,
       });
 
       const mixer = helper.objects.get(mesh).mixer;
@@ -95,14 +124,14 @@ const Main: React.FC = () => {
         VMDControl(mesh, animation);
       });
       isAnimationStarted = false;
-    }
+    };
 
     // モデルやアニメーションを読み込む
     const mesh: SkinnedMesh = await LoadPMX(scene, mmd_path);
-    const animation: AnimationClip = await LoadVMD(mesh, vmd_path)
+    const animation: AnimationClip = await LoadVMD(mesh, vmd_path);
 
     VMDControl(mesh, animation);
-  }
+  };
 
   /**
    * MMDモデルを読み込みThree.jsを用いて描画を行う
@@ -129,11 +158,17 @@ const Main: React.FC = () => {
       0.1,
       1000
     );
-    camera.position.set(0, 18, 15);
+    camera.position.set(0, 18, 35);
 
     // モデルやアニメーションを読み込む
     const mmd_path = "./models/こんにゃく式戌亥とこver1.0/戌亥とこ.pmx";
-    const vmd_path = "./animations/loop.vmd";
+    /*
+    const mmd_path =
+      "./models/こんにゃく式アンジュ・カトリーナver1.1/アンジュ・カトリーナ(160cm).pmx";
+    const mmd_path =
+      "./models/こんにゃく式リゼ・ヘルエスタver1.0/リゼ・ヘルエスタ.pmx";
+    */
+    const vmd_path = "./animations/スイマジ/sweetmagic-right.vmd";
     LoadModel(scene, mmd_path, vmd_path);
 
     const render = () => {
@@ -148,7 +183,6 @@ const Main: React.FC = () => {
 
     render();
   };
-
 
   return (
     <>
